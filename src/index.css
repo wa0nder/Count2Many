@@ -30,11 +30,22 @@ h1 {
     font-size: 4em;
 }
 
-.counterNum{
+.counter__controlBtn{
     color: black;
     background-color: white;
-    font-size: 4rem;
-    
+    font-size: 1.5rem;
+    border-radius: 0.2em;
+}
+
+.counter__controlBtn:hover{
+    color: white;
+    background-color: black;
+    border-color: white;
+    outline-color: white;
+}
+
+.counter__controlBtn:active{
+    background-color:gray;
 }
 
 .counter__resetLink{

@@ -2,13 +2,17 @@
 
 import React from "react";
 import ReactDOM from "react-dom";
-import { Counter, incAction } from "./Counter.js";
+import { Provider } from "react-redux";
+import Counter from "./Counter.js";
 import { store } from "./store.js";
 
 function App(){
 
-    return <Counter store={store}/>;
+    return <Counter />;
 }
 
-const domContainer = document.getElementById('AnchorComponent');
-ReactDOM.render(<App />, domContainer);
+ReactDOM.render(
+    <Provider store={store}>
+        <App />
+    </Provider>, 
+document.getElementById('AnchorComponent'));
