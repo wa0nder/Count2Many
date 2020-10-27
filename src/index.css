@@ -9,7 +9,13 @@ h1 {
     text-align: center;
 }
 
-.counter{
+.addCounterBtn, .removeCounterBtn {
+    border-radius: 5px;
+    color: lightgray;
+    background-color: darkgray;
+}
+
+.counter {
     width: 20%;
     border: 2px dashed red;
     text-align: center;
@@ -23,31 +29,32 @@ h1 {
     margin-bottom: 0.2em;
 }
 
-.counter__holder{
+.counter__holder {
+    color: white;
     background-color: blue;
     max-width: 100px;
     text-align: center;
     font-size: 4em;
 }
 
-.counter__controlBtn{
+.counter__controlBtn {
     color: black;
     background-color: white;
     font-size: 1.5rem;
     border-radius: 0.2em;
 }
 
-.counter__controlBtn:hover{
+.counter__controlBtn:hover {
     color: white;
     background-color: black;
     border-color: white;
     outline-color: white;
 }
 
-.counter__controlBtn:active{
+.counter__controlBtn:active {
     background-color:gray;
 }
 
-.counter__resetLink{
+.counter__resetLink {
     text-decoration: underline;
 }

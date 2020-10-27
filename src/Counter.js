@@ -1,6 +1,6 @@
 'use strict'
 
-import React, {useState, useCallback} from "react";
+import React, { useState } from "react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 
@@ -31,7 +31,7 @@ export function counterReducer(state=counterInitialState, action){
     switch(action.type){
 
         case incAction.type:
-            let obj = Object.assign({}, state, {val: state.val+1});
+            let obj = Object.assign({}, state, {val: state.val+action.payload});
 
             return obj;
         
@@ -48,32 +48,35 @@ export function counterReducer(state=counterInitialState, action){
 //React Component
 function Counter({ counter, ctrlBtnClick, resetLinkClick }){
 
-    let [btnVal, setBtnVal] = useState("Start");
-
-    const ctrlBtnStates = {"Stopped": 1, "Started":2 }
-    let ctrlBtnState = ctrlBtnStates.Stopped;
-    let clearIntervalNum = undefined;
-
+    const ctrlBtnStates = {"Stopped": 1, "Started":2 };
+    let [counterState, setCounterState] = useState({
+        state: ctrlBtnStates.Stopped,
+        btnVal: "Start",
+        clearIntervalNum: undefined
+    });
+    
     let onCtrlBtnClick = () => {
 
-        if(ctrlBtnState === ctrlBtnStates.Stopped){
+        if(counterState.state === ctrlBtnStates.Stopped){
 
-            ctrlBtnState = ctrlBtnStates.Started;
-            setBtnVal("Stop");
-
-            clearTimeoutNum = setInterval(()=>{
-
-                ctrlBtnClick(counter+1); //dispatches action to redux store
-
-            }, 1000);
+            setCounterState({
+                state: ctrlBtnStates.Started,
+                btnVal: "Stop",
+                clearIntervalNum: setInterval(()=>{
+                    ctrlBtnClick(1); //dispatches action to redux store
+    
+                }, 1000)
+            });
         }
-        else if(ctrlBtnState === ctrlBtnStates.Started){
+        else if(counterState.state === ctrlBtnStates.Started){
 
-            clearInterval(clearTimeoutNum);
-            clearIntervalNum = undefined;
+            clearInterval(counterState.clearIntervalNum);
 
-            ctrlBtnState = ctrlBtnStates.Stopped;
-            setBtnVal("Start");
+            setCounterState({
+                state: ctrlBtnStates.Stopped,
+                btnVal: "Start",
+                clearIntervalNum: undefined
+            });
         }
     }
     
@@ -82,11 +85,11 @@ function Counter({ counter, ctrlBtnClick, resetLinkClick }){
         <div className="counter">
 
             <div className="counter__holder">
-                {counter}
+                {counter.val}
             </div>
 
             <button className="counter__controlBtn" onClick={onCtrlBtnClick}>
-                {btnVal}
+                {counterState.btnVal}
             </button>
 
             <br/>
@@ -101,21 +104,22 @@ function Counter({ counter, ctrlBtnClick, resetLinkClick }){
 }
 
 Counter.propTypes = {
+    counter: PropTypes.number.isRequired,
     ctrlBtnClick: PropTypes.func.isRequired,
-    resetLinkClick: PropTypes.func.isRequire
+    resetLinkClick: PropTypes.func.isRequired
 
 }
 
 const mapDispatchToProps = dispatch => {
     return {
         ctrlBtnClick: counter => dispatch( createIncAction(counter) ),
-        resetLinkClick: () => dispatch(createResetCounterAction())
+        resetLinkClick: () => dispatch( createResetCounterAction() )
     }
 }
 
 const mapStateToProps = state => {
     return {
-        counter: state.counter.val
+        counter: state.counter
     }
 }
 
