@@ -4,6 +4,7 @@
   "description": "",
   "main": "App.js",
   "dependencies": {
+    "nanoid": "^3.1.16",
     "react": "^17.0.0",
     "react-dom": "^17.0.0",
     "react-redux": "^7.2.1",

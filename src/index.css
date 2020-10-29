@@ -9,7 +9,7 @@ h1 {
     text-align: center;
 }
 
-.addCounterBtn, .removeCounterBtn {
+.counterBtn {
     border-radius: 5px;
     color: lightgray;
     background-color: darkgray;

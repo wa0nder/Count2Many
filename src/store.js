@@ -1,4 +1,4 @@
-import { createStore } from "redux";
+import { createStore, applyMiddleware } from "redux";
 import thunkMiddleware from "redux-thunk";
 import { counterReducer, counterInitialState } from "./Counter.js";
 import { counterListReducer, counterListInitialState } from "./CounterList.js";
@@ -19,4 +19,6 @@ export const store = createStore(
     allReducers,
     applyMiddleware(thunkMiddleware)
 );
+
+store.subscribe(()=> console.log("state: ", store.getState()));
 

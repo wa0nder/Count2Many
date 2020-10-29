@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
+import { nanoid } from "nanoid";
+import { Link } from "react-router-dom";
 
 //Actions
 export const incAction = {
@@ -24,7 +26,7 @@ function createResetCounterAction(){
 }
 
 //Reducer
-export const counterInitialState = {val: 0};
+export const counterInitialState = {id: nanoid(), val: 0};
 
 export function counterReducer(state=counterInitialState, action){
 
@@ -83,6 +85,8 @@ function Counter({ counter, ctrlBtnClick, resetLinkClick }){
     return (
 
         <div className="counter">
+
+            <Link to="/allCounters">Counter List</Link>
 
             <div className="counter__holder">
                 {counter.val}
