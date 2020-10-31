@@ -5,42 +5,44 @@ import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import { nanoid } from "nanoid";
 import { Link } from "react-router-dom";
+import { store } from "./store.js";
+
+export const INC_COUNTER = "INC_COUNTER";
+export const RESET_COUNTER = "RESET_COUNTER";
 
 //Actions
-export const incAction = {
-    type: "counter/increment",
-}
-
-function createIncAction(counterVal){
+function createIncAction(id, val){
     return {
-        type: "counter/increment",
-        payload: counterVal
+        type: INC_COUNTER,
+        payload: {id, val}
     }
 }
 
-const resetAction = {
-    type: "counter/reset"
-}
-function createResetCounterAction(){
-    return resetAction
+function createResetCounterAction(id){
+    return {
+        type: RESET_COUNTER,
+        payload: {id}
+    }
 }
 
 //Reducer
-export const counterInitialState = {id: nanoid(), val: 0};
+//export const counterInitialState = {id: nanoid(), val: 0};
 
-export function counterReducer(state=counterInitialState, action){
+export function counterReducer(state, action){
 
     switch(action.type){
 
-        case incAction.type:
-            let obj = Object.assign({}, state, {val: state.val+action.payload});
+        case INC_COUNTER:
+            let newstate = Object.assign({}, state);
+            newstate.counters[action.payload.id].val += action.payload.val;
 
-            return obj;
+            return newstate;
         
-        case resetAction.type:
-            obj = Object.assign({}, state, {val:0});
+        case RESET_COUNTER:
+            newstate = Object.assign({}, state);
+            newstate.counters[action.payload.id].val = 0;
 
-            return obj;
+            return newstate;
 
         default:
             return state;
@@ -48,9 +50,13 @@ export function counterReducer(state=counterInitialState, action){
 }
 
 //React Component
-function Counter({ counter, ctrlBtnClick, resetLinkClick }){
+export default function Counter({id, match}){
 
     const ctrlBtnStates = {"Stopped": 1, "Started":2 };
+    const ID = id || match.params.id;
+    const dispatch = store.dispatch;
+    const counter = store.getState().counterList.counters[ID];
+
     let [counterState, setCounterState] = useState({
         state: ctrlBtnStates.Stopped,
         btnVal: "Start",
@@ -65,7 +71,7 @@ function Counter({ counter, ctrlBtnClick, resetLinkClick }){
                 state: ctrlBtnStates.Started,
                 btnVal: "Stop",
                 clearIntervalNum: setInterval(()=>{
-                    ctrlBtnClick(1); //dispatches action to redux store
+                    dispatch( createIncAction(ID, 1) );
     
                 }, 1000)
             });
@@ -85,8 +91,8 @@ function Counter({ counter, ctrlBtnClick, resetLinkClick }){
     return (
 
         <div className="counter">
-
-            <Link to="/allCounters">Counter List</Link>
+            
+            <Link to={`/counter/${ID}`}>ID: {ID}</Link>
 
             <div className="counter__holder">
                 {counter.val}
@@ -98,7 +104,7 @@ function Counter({ counter, ctrlBtnClick, resetLinkClick }){
 
             <br/>
 
-            <span className="counter__resetLink" onClick={resetLinkClick}>
+            <span className="counter__resetLink" onClick={() => dispatch( createResetCounterAction(ID) )}>
                 reset
             </span>
 
@@ -111,21 +117,20 @@ Counter.propTypes = {
     counter: PropTypes.number.isRequired,
     ctrlBtnClick: PropTypes.func.isRequired,
     resetLinkClick: PropTypes.func.isRequired
-
 }
 
-const mapDispatchToProps = dispatch => {
-    return {
-        ctrlBtnClick: counter => dispatch( createIncAction(counter) ),
-        resetLinkClick: () => dispatch( createResetCounterAction() )
-    }
-}
+// const mapDispatchToProps = dispatch => {
+//     return {
+//         ctrlBtnClick: counter => dispatch( createIncAction(counter) ),
+//         resetLinkClick: () => dispatch( createResetCounterAction() )
+//     }
+// }
 
-const mapStateToProps = state => {
-    return {
-        counter: state.counter
-    }
-}
+// const mapStateToProps = state => {
+//     return {
+//         counter: state.counter
+//     }
+// }
 
-export default Counter = connect(mapStateToProps, mapDispatchToProps)(Counter);
+// export default Counter = connect(mapStateToProps, mapDispatchToProps)(Counter);
 

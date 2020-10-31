@@ -1,12 +1,13 @@
-import React, {useState} from "react";
+import React, {useState, useEffect} from "react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
-import Counter from "./Counter.js";
+import Counter, {counterReducer, INC_COUNTER, RESET_COUNTER} from "./Counter.js";
 
 //Actions
 export const ADD_COUNTER = "ADD_COUNTER";
 export const REMOVE_COUNTER = "REMOVE_COUNTER";
 export const FETCH_COUNTERS_LIST = "FETCH_COUNTERS_LIST";
+
 export function fetchCountersList(numToFetch){
     return {
         type: FETCH_COUNTERS_LIST,
@@ -49,22 +50,42 @@ export function getCountersList(numToFetch){
 
         dispatch( fetchCountersList(numToFetch) );
 
-        return fetch(`http://sidewalks.com/getCounters.php?count=${numtoFetch}`)
+        return fetch(`http://sidewalks.com/play-app/fakeDB.php?count=${numToFetch}`)
 
         .then( response => response.json() )
 
-        .then( data => dispatch(receiveCountersList(data)) )
+        .then( data => {
+            return (data.status === "ok") ? 
+                dispatch(receiveCountersList(data.body)) : 
+                dispatch(invalidCountersList(data.body))
+         });
     }
 }
 
-function updateCountersList(newCounter){
+function updateCountersList(id){
 
+    return function(dispatch){
+
+        dispatch( addNewCounterToList(id) );
+
+        return fetch("http://sidewalks.com/play-app/fakeDB.php", {
+            method: 'POST', 
+            mode: 'cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({"id":id})
+          })
+          
+        .then( response => response.json() )
+
+        .then( data => console.log("Response: ", data));
+    }
 }
 
 //Reducer
 export const counterListInitialState = {
     needUpdate: true, 
     isFetching: false,
+    currentCounterId: undefined,
     counters: {}
 }
 export function counterListReducer(state=counterListInitialState, action){
@@ -76,13 +97,17 @@ export function counterListReducer(state=counterListInitialState, action){
             switch(action.status){
 
                 case "request":
-                    return Object.assign({}, state, {isFetching:true})
+                    return Object.assign({}, state, {isFetching:true});
                     
                 case "success":
-                    return Object.assign({}, state, {needUpdate:false, isFetching:false})
+                    return Object.assign({}, state, {
+                        needUpdate: false, 
+                        isFetching: false, 
+                        counters: action.payload
+                    });
 
                 case "failure":
-                    return Object.assign({}, state, {isFetching:false})
+                    return Object.assign({}, state, {isFetching:false});
             }
 
             break;
@@ -106,29 +131,40 @@ export function counterListReducer(state=counterListInitialState, action){
 
         case REMOVE_COUNTER:
 
-            const newState = {needUpdate: state.needUpdate, isFetching: state.isFetching};
-            return Object.keys(state.counters)
+            const newState = {needUpdate: state.needUpdate, isFetching: state.isFetching, counters:{}};
+            
+            Object.keys(state.counters)
                 .filter(id => id !== action.payload)
-                .reduce( (newState, id) => Object.defineProperty(newState, id, {value:state.counters[id]}), newState);
+                .reduce( (counters, id) => Object.defineProperty(counters, id, {enumerable:true, value: {id, val:state.counters[id].val}}), newState.counters);
+            
+            return newState;
         
+        case INC_COUNTER:
+        case RESET_COUNTER:
+            return counterReducer(state, action);
+                
         default:
             return state;
     }
 }
 
 //React View Component
-function CounterList( {list, addCounter, removeCounter} ){
+function CounterList( {list, addCounter, removeCounter, getCounterList } ){
 
     const [isCreating, setIsCreating] = useState(false);
     const [name, setName] = useState("");
 
     //put useEffect for initial onMount
+    useEffect( () => {
+        getCounterList(9);
+    }, []);
 
     const toggleCreateNewCounter = () => {
         setIsCreating(!isCreating);
+        setName("");
     }
 
-    const verifyDispatchName = e => {
+    const verifyDispatchName = () => {
 
         if( !(typeof name === "string" && name.length > 0) ){ return; }
 
@@ -158,9 +194,9 @@ function CounterList( {list, addCounter, removeCounter} ){
                 {
                     Object.keys(list.counters).map( id => {
                         return (
-                            <li key={id}> 
-                                <Counter />
-                                <button className="counterBtn" onClick={id=>removeCounter(id)}>X</button>
+                            <li className="counter_li" key={id}> 
+                                <Counter id={id} />
+                                <button className="counterBtn__remove" onClick={()=>removeCounter(id)}>X</button>
                             </li>
                         );
                     })
@@ -178,8 +214,9 @@ CounterList.propTypes = {
 const mapDispatchToProps = dispatch => {
 
     return {
-        addCounter: id => dispatch( addNewCounterToList(id) ),
-        removeCounter: id => dispatch( removeCounterFromList(id) )
+        addCounter: id => dispatch( updateCountersList(id) ),
+        removeCounter: id => dispatch( removeCounterFromList(id) ),
+        getCounterList: num => dispatch( getCountersList(num) )
     }
 }
 

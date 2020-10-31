@@ -13,17 +13,16 @@ if( $_SERVER["REQUEST_METHOD"] == "GET" ){
 
     $out;
     $status;
-    switch( $_GET["query"] ){
-        
-        case "counterlist":
-            
-            $status = OK;
-            $out = $counters;
-            break;
+    if( isset($_GET["count"]) ){
 
-        default:
-            $status = ERROR;
-            $out = "Resource not available";
+        $fetchNum = $_GET["count"];
+        $status = OK;
+        $out = array_slice($counters, 0, $fetchNum);
+    }
+    else{
+
+        $status = ERROR;
+        $out = "Resource not available";
     }
 
     sendJSONResponse($status, $out);
@@ -31,16 +30,19 @@ if( $_SERVER["REQUEST_METHOD"] == "GET" ){
 
 else if( $_SERVER["REQUEST_METHOD"] == "POST"){
 
-    if( isset($_POST["id"], $_POST["val"]) ){
+    $json = file_get_contents('php://input');
 
-        $id = $_POST["id"];
-        $val = $_POST["val"];
+    $data = (array)json_decode($json);
+
+    if( isset($data["id"]) ){
+
+        $id = $data["id"];
 
         if( isset($counters[$id]) ){
             sendJSONResponse(ERROR, "Counter with that ID already exists.");
         }
         else{
-            $counters[$id] = array(  $id => $val );
+            $counters[$id] = array( "id" => $id, "val" => 0 );
             sendJSONResponse(OK, $counters);
         }
     }

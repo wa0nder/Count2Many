@@ -9,13 +9,21 @@ h1 {
     text-align: center;
 }
 
-.counterBtn {
+.counterBtn, .counterBtn__remove {
     border-radius: 5px;
     color: lightgray;
-    background-color: darkgray;
+    background-color: white;
+    border-color: darkgray;
+    font-size: 3em;
+    font-weight: bold;
+}
+
+.counterBtn__remove {
+    margin-left: 0.5em;
 }
 
 .counter {
+    display: inline-block;
     width: 20%;
     border: 2px dashed red;
     text-align: center;
@@ -57,4 +65,8 @@ h1 {
 
 .counter__resetLink {
     text-decoration: underline;
+}
+
+.counter_li {
+    margin-bottom: 1em;
 }

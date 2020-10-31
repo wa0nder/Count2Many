@@ -5,16 +5,17 @@ import ReactDOM from "react-dom";
 import PropTypes from "prop-types";
 import { BrowserRouter as Router, Route } from "react-router-dom";
 import { Provider } from "react-redux";
-import Counter from "./Counter.js";
+import CounterPage from "./CounterPage.js";
 import CounterList from "./CounterList.js";
 import { store } from "./store.js";
+import { DShift } from "./downshift-ex.js";
 
 function App({ store }){
 
     return <Provider store={store}>
         <Router>
-            <Route path="/" component={Counter} />
-            <Route exact path="/allCounters" component={CounterList} />
+            <Route exact path="/play-app/src/main.html" component={CounterList} />
+            <Route exact path="/counter/:id" component={CounterPage} />
         </Router>
     </Provider>
 }
@@ -23,4 +24,4 @@ App.propTypes = {
     store: PropTypes.object.isRequired
 }
 
-ReactDOM.render(<App store={store}/>, document.getElementById('AnchorComponent'));
+ReactDOM.render(DShift, document.getElementById('AnchorComponent'));

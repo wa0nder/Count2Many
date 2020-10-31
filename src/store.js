@@ -4,13 +4,13 @@ import { counterReducer, counterInitialState } from "./Counter.js";
 import { counterListReducer, counterListInitialState } from "./CounterList.js";
 
 const storeInitialState = {
-    counter: counterInitialState,
+    //counter: counterInitialState,
     counterList: counterListInitialState
 };
 
 function allReducers(state=storeInitialState, action){
     return {
-        counter: counterReducer(state.counter, action),
+        //counter: counterReducer(state.counter, action),
         counterList: counterListReducer(state.counterList, action)
     }
 }
@@ -20,5 +20,5 @@ export const store = createStore(
     applyMiddleware(thunkMiddleware)
 );
 
-store.subscribe(()=> console.log("state: ", store.getState()));
+store.subscribe(() => console.log("state: ", store.getState()));
 
