@@ -24,4 +24,4 @@ App.propTypes = {
     store: PropTypes.object.isRequired
 }
 
-ReactDOM.render(DShift, document.getElementById('AnchorComponent'));
+ReactDOM.render(<App store={store}/>, document.getElementById('AnchorComponent'));

@@ -62,6 +62,8 @@ export default function Counter({id, match}){
         btnVal: "Start",
         clearIntervalNum: undefined
     });
+
+    //console.log("counter state: ", counterState);
     
     let onCtrlBtnClick = () => {
 

@@ -62,17 +62,26 @@ export function getCountersList(numToFetch){
     }
 }
 
-function updateCountersList(id){
+function updateCountersList(id, actionType){
 
     return function(dispatch){
 
-        dispatch( addNewCounterToList(id) );
+        switch(actionType){
+            case ADD_COUNTER:
+                dispatch( addNewCounterToList(id) );
+                break;
+            case REMOVE_COUNTER:
+                dispatch( removeCounterFromList(id) );
+                break;
+        }
 
+        console.log("id: ", id);
+        
         return fetch("http://sidewalks.com/play-app/fakeDB.php", {
             method: 'POST', 
             mode: 'cors',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({"id":id})
+            body: JSON.stringify({"action": actionType, "id":id})
           })
           
         .then( response => response.json() )
@@ -214,8 +223,8 @@ CounterList.propTypes = {
 const mapDispatchToProps = dispatch => {
 
     return {
-        addCounter: id => dispatch( updateCountersList(id) ),
-        removeCounter: id => dispatch( removeCounterFromList(id) ),
+        addCounter: id => dispatch( updateCountersList(id, ADD_COUNTER) ),
+        removeCounter: id => dispatch( updateCountersList(id, REMOVE_COUNTER) ),
         getCounterList: num => dispatch( getCountersList(num) )
     }
 }

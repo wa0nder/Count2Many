@@ -1,8 +1,9 @@
 import React from "react";
 import Counter from "./Counter.js";
+import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 
-export default function CounterPage( {match} ){
+function CounterPage( {match} ){
 
     return (
         <React.Fragment>
@@ -12,3 +13,7 @@ export default function CounterPage( {match} ){
         </React.Fragment>
     );
 }
+
+const mapStateToProps = state => state;
+
+export default CounterPage = connect(mapStateToProps)(CounterPage);
