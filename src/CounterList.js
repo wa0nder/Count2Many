@@ -111,6 +111,30 @@ function updateCountersList(id, actionType){
     }
 }
 
+function saveCounters(list, actionType){
+    
+    return dispatch => {
+
+        dispatch( saveCountersListStart() );
+
+        fetch("http://sidewalks.com/play-app/fakeDB.php", {
+            method: 'POST', 
+            mode: 'cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({"action": actionType, "data":list.counters})
+        })
+        
+        .then( response => response.json() )
+
+        .then( data => {
+
+            console.log("Response: ", data);
+
+            dispatch( (data.status === "ok") ? saveCountersListSuccess() : saveCountersListFailure() );
+        });
+    }
+}
+
 //Reducer
 export const counterListInitialState = {
     needUpdate: true, 
@@ -200,16 +224,49 @@ export function counterListReducer(state=counterListInitialState, action){
 }
 
 //React View Component
-
+//11 x 6
 const saveBtnText = (
-    "________\n" +
+    " ________ \n" +
     "|| SAVE ||\n" +
     "||______||\n" +
     "|  ____  |\n" +
     "| |!]  | |\n" +
     " `````````");
+//14,15,16,17 - letter indexing
+//47,48,49,50 - disk read slider indexing
 
-function CounterList( {list, dispatch, addCounter, removeCounter, getCounterList } ){
+function createLoadingAnimation(){
+
+    const loadingIconArray = saveBtnText.split("");
+    let idx = 47;
+    let cnt = 0;
+    let dir = 1;
+    let saveToggle = true;
+    
+    return () => {
+
+            (saveToggle) ? loadingIconArray.splice(14,4," ", " ", " ", " ") : loadingIconArray.splice(14,4,"S","A","V","E");
+            saveToggle = !saveToggle;
+
+            loadingIconArray[idx] = "#";
+            loadingIconArray[idx+1] = " ";
+
+            idx += dir;
+            cnt += 1;
+
+            loadingIconArray[idx] = "!";
+            loadingIconArray[idx+1] = "]";
+
+            if(cnt === 2){
+                dir *= -1;
+                cnt = 0;
+            }
+
+            return loadingIconArray.join("");
+        };
+}
+
+function CounterList( {list, dispatch, addCounter, removeCounter, saveCounters, getCounterList } ){
 
     const [isCreating, setIsCreating] = useState(false);
     const [name, setName] = useState("");
@@ -221,6 +278,21 @@ function CounterList( {list, dispatch, addCounter, removeCounter, getCounterList
         
         if( Object.keys(list.counters).length === 0){ getCounterList(9); }
     }, []);
+
+    const [saveBtnIcon, setBtnIcon] = useState(saveBtnText);
+    const interval = useRef(undefined);
+    if(list.isSaving === true){
+
+        let getNextFrame = createLoadingAnimation();
+        interval.current = setInterval( () => setBtnIcon(getNextFrame()), 250);
+    }
+    else if(interval.current !== undefined){ 
+
+        setTimeout( () => { 
+            clearInterval(interval.current);
+            interval.current = undefined;
+        }, 3000 );
+    }
 
     const toggleCreateNewCounter = () => {
         setIsCreating(!isCreating);
@@ -244,20 +316,6 @@ function CounterList( {list, dispatch, addCounter, removeCounter, getCounterList
         removeCounter(id);
     }
 
-    const saveCounters = () => {
-
-        fetch("http://sidewalks.com/play-app/fakeDB.php", {
-            method: 'POST', 
-            mode: 'cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({"action": SAVE_COUNTERS, "data":list.counters})
-          })
-          
-        .then( response => response.json() )
-
-        .then( data => console.log("Response: ", data));
-    }
-
     return( 
         <React.Fragment>
 
@@ -274,7 +332,7 @@ function CounterList( {list, dispatch, addCounter, removeCounter, getCounterList
                 </form>
             )}
 
-            <button className="counterBtn counterBtn__save" onClick={saveCounters}>{saveBtnText}</button>
+            <button className="counterBtn counterBtn__save" onClick={() => saveCounters(list,SAVE_COUNTERS)}>{saveBtnIcon}</button>
 
             <ol>
                 {
@@ -306,6 +364,7 @@ const mapDispatchToProps = dispatch => {
         dispatch,
         addCounter: id => dispatch( updateCountersList(id, ADD_COUNTER) ),
         removeCounter: id => dispatch( updateCountersList(id, REMOVE_COUNTER) ),
+        saveCounters: (list, actionType) => dispatch( saveCounters(list, actionType) ),
         getCounterList: num => dispatch( getCountersList(num) )
     }
 }
