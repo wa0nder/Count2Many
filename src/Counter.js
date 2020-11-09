@@ -1,14 +1,15 @@
 'use strict'
 
 import React, { useState } from "react";
-import { connect } from "react-redux";
 import PropTypes from "prop-types";
-import { nanoid } from "nanoid";
 import { Link } from "react-router-dom";
-import { store } from "./store.js";
+import { connect } from "react-redux";
+import { nanoid } from "nanoid";
 
 export const INC_COUNTER = "INC_COUNTER";
 export const RESET_COUNTER = "RESET_COUNTER";
+export const TOGGLE_COUNTER = "TOGGLE_COUNTER";
+export const COUNTER_STATES = {Stopped:"stopped", Started:"started"};
 
 //Actions
 function createIncAction(id, val){
@@ -25,68 +26,99 @@ function createResetCounterAction(id){
     }
 }
 
+function createToggleCounterAction(id, state, intervalNum){
+    return {
+        type: TOGGLE_COUNTER,
+        payload: {id, state, intervalNum}
+    }
+}
+
 //Reducer
-//export const counterInitialState = {id: nanoid(), val: 0};
+
+
+//counter state structure -> { id, val, state };
 
 export function counterReducer(state, action){
 
+    const id = action.payload.id;
+
     switch(action.type){
 
-        case INC_COUNTER:
-            let newstate = Object.assign({}, state);
-            newstate.counters[action.payload.id].val += action.payload.val;
+        case TOGGLE_COUNTER: {
 
-            return newstate;
+            const newState = Object.assign({}, state);
+
+            Object.keys(newState).forEach( key => {
+
+                newState[key] = Object.assign({}, state[key]);
+
+                if(key === id){ 
+                    newState[key].state = action.payload.state;
+                    newState[key].intervalNum = action.payload.intervalNum;
+                }
+            });
+
+            return newState;
+        }
+
+        case INC_COUNTER: {
+
+            const newState = Object.assign({}, state);
+
+            Object.keys(newState).forEach( key => {
+
+                newState[key] = Object.assign({}, state[key]);
+
+                if(key === id){ newState[key].val += action.payload.val; }
+            });
+
+            return newState;
+        }
         
-        case RESET_COUNTER:
-            newstate = Object.assign({}, state);
-            newstate.counters[action.payload.id].val = 0;
+        case RESET_COUNTER: {
 
-            return newstate;
+            const newState = Object.assign({}, state);
+            
+            Object.keys(newState).forEach( key => {
 
+                newState[key] = Object.assign({}, state[key]);
+
+                if(key === id){ newState[key].val = 0; }
+            });
+
+            return newState;
+        }
+        
         default:
             return state;
     }
 }
 
 //React Component
-export default function Counter({id, match}){
+export default function Counter({ id, match, counterList, dispatch, exposeProp }){
 
-    const ctrlBtnStates = {"Stopped": 1, "Started":2 };
     const ID = id || match.params.id;
-    const dispatch = store.dispatch;
-    const counter = store.getState().counterList.counters[ID];
-
-    let [counterState, setCounterState] = useState({
-        state: ctrlBtnStates.Stopped,
-        btnVal: "Start",
-        clearIntervalNum: undefined
-    });
-
-    //console.log("counter state: ", counterState);
+    const counter = counterList.counters[ID];
+    const btnVal = (counter.state === COUNTER_STATES.Stopped) ? "Start" : "Stop";
     
     let onCtrlBtnClick = () => {
 
-        if(counterState.state === ctrlBtnStates.Stopped){
+        if(counter.state === COUNTER_STATES.Stopped){
 
-            setCounterState({
-                state: ctrlBtnStates.Started,
-                btnVal: "Stop",
-                clearIntervalNum: setInterval(()=>{
-                    dispatch( createIncAction(ID, 1) );
-    
-                }, 1000)
-            });
+            const intervalNum = setInterval(()=>{
+                dispatch( createIncAction(ID, 1) );
+
+            }, 1000);
+
+            if(exposeProp){ exposeProp(intervalNum); }
+
+            dispatch( createToggleCounterAction(ID, COUNTER_STATES.Started, intervalNum) );
         }
-        else if(counterState.state === ctrlBtnStates.Started){
+        else if(counter.state === COUNTER_STATES.Started){
 
-            clearInterval(counterState.clearIntervalNum);
+            clearInterval(counter.intervalNum);
 
-            setCounterState({
-                state: ctrlBtnStates.Stopped,
-                btnVal: "Start",
-                clearIntervalNum: undefined
-            });
+            dispatch( createToggleCounterAction(ID, COUNTER_STATES.Stopped, undefined) );
         }
     }
     
@@ -101,7 +133,7 @@ export default function Counter({id, match}){
             </div>
 
             <button className="counter__controlBtn" onClick={onCtrlBtnClick}>
-                {counterState.btnVal}
+                {btnVal}
             </button>
 
             <br/>
@@ -116,7 +148,6 @@ export default function Counter({id, match}){
 }
 
 Counter.propTypes = {
-    counter: PropTypes.number.isRequired,
     ctrlBtnClick: PropTypes.func.isRequired,
     resetLinkClick: PropTypes.func.isRequired
 }

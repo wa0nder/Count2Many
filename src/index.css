@@ -9,7 +9,7 @@ h1 {
     text-align: center;
 }
 
-.counterBtn, .counterBtn__remove {
+.counterBtn {
     border-radius: 5px;
     color: lightgray;
     background-color: white;
@@ -18,8 +18,36 @@ h1 {
     font-weight: bold;
 }
 
+.counterBtn:hover {
+    color: white;
+    background-color: gray;
+}
+
+.counterBtn:active {
+    background-color: lightgray;
+}
+
 .counterBtn__remove {
     margin-left: 0.5em;
+}
+
+.counterBtn__save {
+    display: block;
+    font-family: monospace;
+    font-size: 1em;
+    color: black;
+    white-space: pre;
+    margin-top: 2em;
+    margin-left: auto;
+}
+
+.counterBtn__save:hover {
+    background-color: green;
+    border-color: gray;
+}
+
+.counterBtn__save:active {
+    background-color: lightgreen;
 }
 
 .counter {

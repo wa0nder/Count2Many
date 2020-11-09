@@ -65,10 +65,26 @@ else if( $_SERVER["REQUEST_METHOD"] == "POST"){
 
     $data = (array)json_decode($json);
 
-    if( isset($data["id"], $data["action"]) ){
+    if( !isset($data["action"]) ){ return sendJSONResponse(ERROR, "Nothing was done."); }
+
+    $action = $data["action"];
+
+    if( $action == "SAVE_COUNTERS" && isset($data["data"]) ){
+        $counterList = $data["data"];
+
+        foreach($counterList as $id => $counter){
+            $counter = (array)$counter;
+            unset( $counter["intervalNum"] );
+        }
+
+        $result = saveToDB($counterList);
+
+        return sendJSONResponse($result["status"], $result["body"]);
+    }
+
+    if( isset($data["id"]) ){
 
         $id = $data["id"];
-        $action = $data["action"];
 
         $get = loadDB();
 
@@ -83,7 +99,7 @@ else if( $_SERVER["REQUEST_METHOD"] == "POST"){
                     return sendJSONResponse(ERROR, "Counter with that ID already exists.");
                 }
                     
-                $counters[$id] = array( "id" => $id, "val" => 0 ); 
+                $counters[$id] = array( "id" => $id, "val" => 0, "state" => "stopped" ); 
             }
             else if($action == "REMOVE_COUNTER"){ 
                 
@@ -99,9 +115,11 @@ else if( $_SERVER["REQUEST_METHOD"] == "POST"){
         }
         else{
 
-            sendJSONResponse($get["status"], $get["body"]);
+            return sendJSONResponse($get["status"], $get["body"]);
         }
     }
+
+    return sendJSONResponse(OK, "Nothing happened.");
 
 }
 

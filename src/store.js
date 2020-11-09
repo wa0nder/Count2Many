@@ -1,6 +1,6 @@
 import { createStore, applyMiddleware } from "redux";
 import thunkMiddleware from "redux-thunk";
-import { counterReducer, counterInitialState } from "./Counter.js";
+//import { counterReducer, counterInitialState } from "./Counter.js";
 import { counterListReducer, counterListInitialState } from "./CounterList.js";
 
 const storeInitialState = {

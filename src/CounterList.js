@@ -1,12 +1,14 @@
-import React, {useState, useEffect} from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
-import Counter, {counterReducer, INC_COUNTER, RESET_COUNTER} from "./Counter.js";
+import Counter, { counterReducer, INC_COUNTER, RESET_COUNTER, TOGGLE_COUNTER, COUNTER_STATES } from "./Counter.js";
 
 //Actions
 export const ADD_COUNTER = "ADD_COUNTER";
 export const REMOVE_COUNTER = "REMOVE_COUNTER";
 export const FETCH_COUNTERS_LIST = "FETCH_COUNTERS_LIST";
+const SAVE_COUNTERS_LIST = "SAVE_COUNTERS_LIST";
+const SAVE_COUNTERS = "SAVE_COUNTERS";
 
 export function fetchCountersList(numToFetch){
     return {
@@ -22,11 +24,32 @@ export function receiveCountersList(list){
         payload: list
     }
 }
-export function invalidCountersList(error){
+export function invalidCountersList(){
     return {
         type: FETCH_COUNTERS_LIST,
-        status: "failure",
-        payload: error
+        status: "failure"
+    }
+}
+
+function saveCountersListStart(list){
+    return {
+        type: SAVE_COUNTERS_LIST,
+        status: "request",
+        payload: list
+    }
+}
+
+function saveCountersListSuccess(){
+    return {
+        type: SAVE_COUNTERS_LIST,
+        status: "success"
+    }
+}
+
+function saveCountersListFailure(){
+    return {
+        type: SAVE_COUNTERS_LIST,
+        status: "failure"
     }
 }
 
@@ -74,8 +97,6 @@ function updateCountersList(id, actionType){
                 dispatch( removeCounterFromList(id) );
                 break;
         }
-
-        console.log("id: ", id);
         
         return fetch("http://sidewalks.com/play-app/fakeDB.php", {
             method: 'POST', 
@@ -94,9 +115,10 @@ function updateCountersList(id, actionType){
 export const counterListInitialState = {
     needUpdate: true, 
     isFetching: false,
-    currentCounterId: undefined,
+    isSaving: false,
     counters: {}
 }
+
 export function counterListReducer(state=counterListInitialState, action){
 
     switch(action.type){
@@ -121,10 +143,23 @@ export function counterListReducer(state=counterListInitialState, action){
 
             break;
         
+        case SAVE_COUNTERS_LIST:
+
+            switch(action.status){
+                
+                case "request":
+                    return Object.assign({}, state, {isSaving:true});
+                case "success":
+                case "failure":
+                    return Object.assign({}, state, {isSaving:false});
+            }
+
+            break;
+        
         case ADD_COUNTER:
 
             const id = action.payload;
-            const newCounters = { [id] : {id, val: 0} };
+            const newCounters = { [id] : {id, val: 0, state: COUNTER_STATES.Stopped} };
             return { 
                     needUpdate: state.needUpdate,
                     isFetching: state.isFetching,
@@ -149,23 +184,42 @@ export function counterListReducer(state=counterListInitialState, action){
             return newState;
         
         case INC_COUNTER:
-        case RESET_COUNTER:
-            return counterReducer(state, action);
-                
+        case TOGGLE_COUNTER:
+        case RESET_COUNTER: {
+
+            const newState = Object.assign({}, state);
+
+            newState.counters = counterReducer(state.counters, action);
+
+            return newState;
+        }
+         
         default:
             return state;
     }
 }
 
 //React View Component
-function CounterList( {list, addCounter, removeCounter, getCounterList } ){
+
+const saveBtnText = (
+    "________\n" +
+    "|| SAVE ||\n" +
+    "||______||\n" +
+    "|  ____  |\n" +
+    "| |!]  | |\n" +
+    " `````````");
+
+function CounterList( {list, dispatch, addCounter, removeCounter, getCounterList } ){
 
     const [isCreating, setIsCreating] = useState(false);
     const [name, setName] = useState("");
 
-    //put useEffect for initial onMount
+    const intervalNumRef = useRef(undefined);
+
+    //onMount
     useEffect( () => {
-        getCounterList(9);
+        
+        if( Object.keys(list.counters).length === 0){ getCounterList(9); }
     }, []);
 
     const toggleCreateNewCounter = () => {
@@ -182,6 +236,27 @@ function CounterList( {list, addCounter, removeCounter, getCounterList } ){
     }
 
     const handleInput = ({target:{value}}) => setName(value);
+    
+    const deleteCounter = id => {
+
+        if(intervalNumRef.current !== undefined){ clearInterval(intervalNumRef.current); }
+        
+        removeCounter(id);
+    }
+
+    const saveCounters = () => {
+
+        fetch("http://sidewalks.com/play-app/fakeDB.php", {
+            method: 'POST', 
+            mode: 'cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({"action": SAVE_COUNTERS, "data":list.counters})
+          })
+          
+        .then( response => response.json() )
+
+        .then( data => console.log("Response: ", data));
+    }
 
     return( 
         <React.Fragment>
@@ -199,13 +274,18 @@ function CounterList( {list, addCounter, removeCounter, getCounterList } ){
                 </form>
             )}
 
+            <button className="counterBtn counterBtn__save" onClick={saveCounters}>{saveBtnText}</button>
+
             <ol>
                 {
                     Object.keys(list.counters).map( id => {
                         return (
                             <li className="counter_li" key={id}> 
-                                <Counter id={id} />
-                                <button className="counterBtn__remove" onClick={()=>removeCounter(id)}>X</button>
+                                <Counter dispatch={dispatch} counterList={list} id={id} exposeProp={(intervalNum) => {
+                                    intervalNumRef.current = intervalNum;
+                                }}
+                                 />
+                                <button className="counterBtn counterBtn__remove" onClick={()=>deleteCounter(id)}>X</button>
                             </li>
                         );
                     })
@@ -223,6 +303,7 @@ CounterList.propTypes = {
 const mapDispatchToProps = dispatch => {
 
     return {
+        dispatch,
         addCounter: id => dispatch( updateCountersList(id, ADD_COUNTER) ),
         removeCounter: id => dispatch( updateCountersList(id, REMOVE_COUNTER) ),
         getCounterList: num => dispatch( getCountersList(num) )

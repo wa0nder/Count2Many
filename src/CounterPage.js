@@ -3,17 +3,18 @@ import Counter from "./Counter.js";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 
-function CounterPage( {match} ){
+function CounterPage( {dispatch, match, counterList} ){
 
     return (
         <React.Fragment>
             <h2><Link to="/play-app/src/main.html">&lt;-- All Counters</Link></h2>
             <br />
-            <Counter match={match}/>
+            <Counter dispatch={dispatch} counterList={counterList} match={match}/>
         </React.Fragment>
     );
 }
 
-const mapStateToProps = state => state;
+const mapDispatchToProps = dispatch => ({dispatch});
+const mapStateToProps = state => ({ counterList: state.counterList });
 
-export default CounterPage = connect(mapStateToProps)(CounterPage);
+export default CounterPage = connect(mapStateToProps, mapDispatchToProps)(CounterPage);
