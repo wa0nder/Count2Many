@@ -281,18 +281,23 @@ function CounterList( {list, dispatch, addCounter, removeCounter, saveCounters, 
 
     const [saveBtnIcon, setBtnIcon] = useState(saveBtnText);
     const interval = useRef(undefined);
-    if(list.isSaving === true){
 
-        let getNextFrame = createLoadingAnimation();
-        interval.current = setInterval( () => setBtnIcon(getNextFrame()), 250);
-    }
-    else if(interval.current !== undefined){ 
+    useEffect( () => {
 
-        setTimeout( () => { 
-            clearInterval(interval.current);
-            interval.current = undefined;
-        }, 3000 );
-    }
+        if(list.isSaving === true){
+
+            let getNextFrame = createLoadingAnimation();
+            interval.current = setInterval( () => setBtnIcon(getNextFrame()), 250);
+        }
+        else if(interval.current !== undefined){ 
+
+            setTimeout( () => { 
+                clearInterval(interval.current);
+                interval.current = undefined;
+            }, 3000 );
+        }
+
+    }, [list.isSaving]);
 
     const toggleCreateNewCounter = () => {
         setIsCreating(!isCreating);

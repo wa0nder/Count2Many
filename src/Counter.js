@@ -35,7 +35,6 @@ function createToggleCounterAction(id, state, intervalNum){
 
 //Reducer
 
-
 //counter state structure -> { id, val, state };
 
 export function counterReducer(state, action){
