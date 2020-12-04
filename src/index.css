@@ -42,7 +42,7 @@ h1 {
 }
 
 .counterBtn__save:hover {
-    background-color: green;
+    background-color: rgb(98, 190, 98);
     border-color: gray;
 }
 

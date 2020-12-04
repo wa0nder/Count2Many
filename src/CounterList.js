@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import Counter, { counterReducer, INC_COUNTER, RESET_COUNTER, TOGGLE_COUNTER, COUNTER_STATES } from "./Counter.js";
+import OwnerInput, { ownerInputReducer, UPDATE_OWNER } from "./OwnerInput.js";
 
 //Actions
 export const ADD_COUNTER = "ADD_COUNTER";
@@ -10,11 +11,10 @@ export const FETCH_COUNTERS_LIST = "FETCH_COUNTERS_LIST";
 const SAVE_COUNTERS_LIST = "SAVE_COUNTERS_LIST";
 const SAVE_COUNTERS = "SAVE_COUNTERS";
 
-export function fetchCountersList(numToFetch){
+export function fetchCountersList(){
     return {
         type: FETCH_COUNTERS_LIST,
-        status: "request",
-        payload: numToFetch
+        status: "request"
     }
 }
 export function receiveCountersList(list){
@@ -67,17 +67,18 @@ function removeCounterFromList(id){
     }
 }
 
-export function getCountersList(numToFetch){
+export function getCountersList(owner, numToFetch){
 
     return function(dispatch){
 
-        dispatch( fetchCountersList(numToFetch) );
+        dispatch( fetchCountersList() );
 
-        return fetch(`http://sidewalks.com/play-app/fakeDB.php?count=${numToFetch}`)
+        return fetch(`http://sidewalks.com/play-app/realDB.php?owner=${owner}&count=${numToFetch}`)
 
         .then( response => response.json() )
 
         .then( data => {
+            //console.log("dat data: ", data);
             return (data.status === "ok") ? 
                 dispatch(receiveCountersList(data.body)) : 
                 dispatch(invalidCountersList(data.body))
@@ -85,7 +86,7 @@ export function getCountersList(numToFetch){
     }
 }
 
-function updateCountersList(id, actionType){
+function updateCountersList(owner, id, actionType){
 
     return function(dispatch){
 
@@ -98,11 +99,11 @@ function updateCountersList(id, actionType){
                 break;
         }
         
-        return fetch("http://sidewalks.com/play-app/fakeDB.php", {
+        return fetch("http://sidewalks.com/play-app/realDB.php", {
             method: 'POST', 
             mode: 'cors',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({"action": actionType, "id":id})
+            body: JSON.stringify({"action": actionType, "id":id, "owner":owner})
           })
           
         .then( response => response.json() )
@@ -117,11 +118,11 @@ function saveCounters(list, actionType){
 
         dispatch( saveCountersListStart() );
 
-        fetch("http://sidewalks.com/play-app/fakeDB.php", {
+        fetch("http://sidewalks.com/play-app/realDB.php", {
             method: 'POST', 
             mode: 'cors',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({"action": actionType, "data":list.counters})
+            body: JSON.stringify({"action": actionType, "owner":list.owner, "data":list.counters})
         })
         
         .then( response => response.json() )
@@ -140,6 +141,7 @@ export const counterListInitialState = {
     needUpdate: true, 
     isFetching: false,
     isSaving: false,
+    owner: undefined,
     counters: {}
 }
 
@@ -185,6 +187,8 @@ export function counterListReducer(state=counterListInitialState, action){
             const id = action.payload;
             const newCounters = { [id] : {id, val: 0, state: COUNTER_STATES.Stopped} };
             return { 
+                    isSaving: state.isSaving,
+                    owner: state.owner,
                     needUpdate: state.needUpdate,
                     isFetching: state.isFetching,
                     counters: Object.keys(state.counters).reduce( (cntrsObj, cntrId) => {
@@ -199,7 +203,13 @@ export function counterListReducer(state=counterListInitialState, action){
 
         case REMOVE_COUNTER:
 
-            const newState = {needUpdate: state.needUpdate, isFetching: state.isFetching, counters:{}};
+            const newState = {
+                isSaving: state.isSaving,
+                owner: state.owner,
+                needUpdate: state.needUpdate, 
+                isFetching: state.isFetching, 
+                counters:{}
+            };
             
             Object.keys(state.counters)
                 .filter(id => id !== action.payload)
@@ -217,6 +227,15 @@ export function counterListReducer(state=counterListInitialState, action){
 
             return newState;
         }
+
+        case UPDATE_OWNER: {
+
+            const newState = Object.assign({}, state);
+
+            newState.owner = ownerInputReducer(state.owner, action);
+
+            return newState;
+        }
          
         default:
             return state;
@@ -224,6 +243,7 @@ export function counterListReducer(state=counterListInitialState, action){
 }
 
 //React View Component
+
 //11 x 6
 const saveBtnText = (
     " ________ \n" +
@@ -268,16 +288,19 @@ function createLoadingAnimation(){
 
 function CounterList( {list, dispatch, addCounter, removeCounter, saveCounters, getCounterList } ){
 
+    const hasOwner = list.owner !== undefined;
     const [isCreating, setIsCreating] = useState(false);
     const [name, setName] = useState("");
+    const [validName, setValidName] = useState(true);
 
     const intervalNumRef = useRef(undefined);
 
     //onMount
     useEffect( () => {
         
-        if( Object.keys(list.counters).length === 0){ getCounterList(9); }
-    }, []);
+        if( hasOwner && Object.keys(list.counters).length === 0 ){ getCounterList(list.owner, 9); }
+
+    }, [hasOwner]);
 
     const [saveBtnIcon, setBtnIcon] = useState(saveBtnText);
     const interval = useRef(undefined);
@@ -308,17 +331,30 @@ function CounterList( {list, dispatch, addCounter, removeCounter, saveCounters, 
 
         if( !(typeof name === "string" && name.length > 0) ){ return; }
 
+        if( list.counters.hasOwnProperty(`${list.owner}:${name}`) ){ 
+            setValidName(false);
+            return; 
+        }
+
         toggleCreateNewCounter();
-        addCounter(name);
+        addCounter(list.owner, name);
     }
 
-    const handleInput = ({target:{value}}) => setName(value);
+    const handleInput = ({target:{value}}) => {
+        setValidName(true);
+        setName(value);
+    }
     
     const deleteCounter = id => {
 
         if(intervalNumRef.current !== undefined){ clearInterval(intervalNumRef.current); }
         
-        removeCounter(id);
+        removeCounter(list.owner, id);
+    }
+
+    if(!hasOwner){
+
+        return <OwnerInput />
     }
 
     return( 
@@ -332,8 +368,13 @@ function CounterList( {list, dispatch, addCounter, removeCounter, saveCounters, 
                 <form>
                     <label htmlFor="name">Counter ID: </label>
                     <input type="text" id="name" name="name" value={name} onChange={handleInput}/>
-                    <button className="counterBtn" type="button" onClick={verifyDispatchName}>O</button>
+                    <button className="counterBtn" type="button" onClick={verifyDispatchName}>{"\u2713"}</button>
                     <button className="counterBtn" onClick={toggleCreateNewCounter}>X</button>
+                    { validName ? 
+                        null
+                        :
+                        <span style={{color:"red"}}><br/>*Timer label already used</span>
+                    }
                 </form>
             )}
 
@@ -367,10 +408,10 @@ const mapDispatchToProps = dispatch => {
 
     return {
         dispatch,
-        addCounter: id => dispatch( updateCountersList(id, ADD_COUNTER) ),
-        removeCounter: id => dispatch( updateCountersList(id, REMOVE_COUNTER) ),
+        addCounter: (owner, id) => dispatch( updateCountersList(owner, id, ADD_COUNTER) ),
+        removeCounter: (owner, id) => dispatch( updateCountersList(owner, id, REMOVE_COUNTER) ),
         saveCounters: (list, actionType) => dispatch( saveCounters(list, actionType) ),
-        getCounterList: num => dispatch( getCountersList(num) )
+        getCounterList: (owner, num) => dispatch( getCountersList(owner,num) )
     }
 }
 
