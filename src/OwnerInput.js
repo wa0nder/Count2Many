@@ -47,6 +47,11 @@ function OwnerInput({ updateOwner }){
 
         if(owner === undefined || owner.length === 0){ return; }
 
+        if( !/^\w{4,15}$/.test(owner) ){
+
+            return setValidName(false);
+        }
+
         // (function checkUsernameAvailable(){
 
         //     setCheckingName(true);
@@ -78,7 +83,7 @@ function OwnerInput({ updateOwner }){
             { validName ? 
                 null
                 :
-                <span style={{color:"red"}}><br/>*Name already taken</span>
+                <span style={{color:"red"}}><br/>*Name must be 5 - 15 characters of only letters and numbers</span>
             }
         </form>
     );

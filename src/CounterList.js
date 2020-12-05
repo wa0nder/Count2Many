@@ -291,7 +291,7 @@ function CounterList( {list, dispatch, addCounter, removeCounter, saveCounters, 
     const hasOwner = list.owner !== undefined;
     const [isCreating, setIsCreating] = useState(false);
     const [name, setName] = useState("");
-    const [validName, setValidName] = useState(true);
+    const [validNameMsg, setvalidNameMsg] = useState("");
 
     const intervalNumRef = useRef(undefined);
 
@@ -330,18 +330,22 @@ function CounterList( {list, dispatch, addCounter, removeCounter, saveCounters, 
     const verifyDispatchName = () => {
 
         if( !(typeof name === "string" && name.length > 0) ){ return; }
-
+        
         if( list.counters.hasOwnProperty(`${list.owner}:${name}`) ){ 
-            setValidName(false);
-            return; 
+            return setvalidNameMsg("Timer label already used");
         }
+
+        if( !/^\w{4,15}$/.test(name) ){
+            return setvalidNameMsg("Timer id must be 4 - 15 characters and contain only letters and numbers.")
+        }
+
 
         toggleCreateNewCounter();
         addCounter(list.owner, name);
     }
 
     const handleInput = ({target:{value}}) => {
-        setValidName(true);
+        setvalidNameMsg("");
         setName(value);
     }
     
@@ -370,10 +374,10 @@ function CounterList( {list, dispatch, addCounter, removeCounter, saveCounters, 
                     <input type="text" id="name" name="name" value={name} onChange={handleInput}/>
                     <button className="counterBtn" type="button" onClick={verifyDispatchName}>{"\u2713"}</button>
                     <button className="counterBtn" onClick={toggleCreateNewCounter}>X</button>
-                    { validName ? 
+                    { validNameMsg === "" ? 
                         null
                         :
-                        <span style={{color:"red"}}><br/>*Timer label already used</span>
+                        <span style={{color:"red"}}><br/>*{validNameMsg}</span>
                     }
                 </form>
             )}
