@@ -27,10 +27,10 @@ In addition to all the Redux code, there's some of the common React stuff:
 
 ## Project what?
 
-This lets you create and name as many counters as you like and persist them to a database (currently a simple file write with PHP back-end) by clicking the save button - enjoy the progress indicator :)
+This lets you create an owner name for the timers you'll create and then create and name as many counters as you like and persist them to a database ~~(temporarily a simple file write with PHP back-end)~~ by clicking the save button - enjoy the progress indicator :)
 
 You can also view each counter on its own page by clicking its name then remove them when you are done.
 
 ## Project where?
 
-I should have this up on my site for a live demo soon.
+You can now try it out [here](http://chalk.infinityfreeapp.com/Count2Many/main.html).
