@@ -4,7 +4,7 @@ Exploring Redux by overdoing the standard "simple counter" example a bit
 <img src="counterUI.png" alt="counterUI" width="300"/>
 
 ## Project why?
-This is just a fun little project to brush up my Redux skills and hits all the main points:
+This is just a fun little project to brush up my Redux skills (also an excuse to try out PHP and SQL) and hits all the main points:
 
 - actions
 - action creators
@@ -34,3 +34,7 @@ You can also view each counter on its own page by clicking its name then remove 
 ## Project where?
 
 You can now try it out [here](http://chalk.infinityfreeapp.com/Count2Many/main.html).
+
+## Project thoughts
+
+The PHP code is super basic and amateurish as I'm new to it. It needs filters for input, removal of some hardcoding, better organization, better use of PDO capabilities, etc. etc.
