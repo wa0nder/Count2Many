@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/connectionInfo.php';
+
 // if( $file = fopen("sample.txt",r) ){
     
 //     while( !feof($file) ){
@@ -9,21 +11,31 @@
 //     fclose($file);
 // }
 
-$servername = "localhost";
-$username = "root";
-$password = "root";
-$db = "myDBPDO";
+
 $conn = null;
+
+$options = [
+    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+    PDO::ATTR_EMULATE_PREPARES => false
+];
 
 try{
 
-    $conn = new PDO("mysql:host=$servername", $username, $password);
+    $conn = new PDO("mysql:host=$servername;charset=$charset", $username, $password, $options);
+} 
+catch(PDOException $e) {
+    //re-throw error so that stack trace begins after credentials line so credentials
+        //never have chance to be exposed on accident to an end-user
+    throw new PDOException($e->getMessage(), (int)$e->getCode());
+}
 
-    // set the PDO error mode to exception
-    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    $sql = "CREATE DATABASE IF NOT EXISTS $db";
-    $conn->exec($sql);
+
+try{
+
+    $sql = $conn->prepare("CREATE DATABASE IF NOT EXISTS :db");
+    $sql->execute(["db" => $db]);
 
     $sql = "USE $db";
     $conn->query($sql);
@@ -72,9 +84,8 @@ try{
     //echo "New Record successfully added";
 
     //$conn = null;
-} 
-catch(PDOException $e) {
-    exit( $sql . "<br>" . $e->getMessage() );
 }
-
+catch(PDOException $e) {
+    exit( $sql . "<br>" . $e->getMessage(), (int)$e->getCode());
+}
 

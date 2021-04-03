@@ -8,7 +8,7 @@ import { Provider } from "react-redux";
 import CounterPage from "./CounterPage.js";
 import CounterList from "./CounterList.js";
 import { store } from "./store.js";
-import { DShift } from "./downshift-ex.js";
+//import { DShift } from "./downshift-ex.js";
 
 function App({ store }){
 

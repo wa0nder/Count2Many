@@ -24,6 +24,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "babel --presets es2015,react src/ -d build",
     "babel-watch": "npx babel --presets es2015,react --watch src/ --out-dir dist",
     "webpack-watch": "webpack",
     "dev-start": "npm-run-all --parallel babel-watch webpack-watch"
