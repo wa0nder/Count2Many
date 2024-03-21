@@ -3,3 +3,4 @@ dist
 build
 *.txt
 *.log
+connectionInfo.php

@@ -8,13 +8,12 @@ import { Provider } from "react-redux";
 import CounterPage from "./CounterPage.js";
 import CounterList from "./CounterList.js";
 import { store } from "./store.js";
-//import { DShift } from "./downshift-ex.js";
 
 function App({ store }){
 
     return <Provider store={store}>
         <Router>
-            <Route exact path="/play-app/src/main.html" component={CounterList} />
+            <Route exact path="/src/main.html" component={CounterList} />
             <Route exact path="/counter/:id" component={CounterPage} />
         </Router>
     </Provider>

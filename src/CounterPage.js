@@ -7,7 +7,7 @@ function CounterPage( {dispatch, match, counterList} ){
 
     return (
         <React.Fragment>
-            <h2><Link to="/play-app/src/main.html">&lt;-- All Counters</Link></h2>
+            <h2><Link to="/src/main.html">&lt;-- All Counters</Link></h2>
             <br />
             <Counter dispatch={dispatch} counterList={counterList} match={match}/>
         </React.Fragment>

@@ -34,11 +34,9 @@ catch(PDOException $e) {
 
 try{
 
-    $sql = $conn->prepare("CREATE DATABASE IF NOT EXISTS :db");
-    $sql->execute(["db" => $db]);
-
-    $sql = "USE $db";
-    $conn->query($sql);
+    $conn->exec("CREATE DATABASE IF NOT EXISTS $db");
+    $conn->exec("USE $db");
+    
     //$sql = $conn->prepare("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = 'myDBPDO'");
 
     //$sql = "DROP TABLE Users";
@@ -86,6 +84,8 @@ try{
     //$conn = null;
 }
 catch(PDOException $e) {
-    exit( $sql . "<br>" . $e->getMessage(), (int)$e->getCode());
+    //re-throw error so that stack trace begins after credentials line so credentials
+    //never have chance to be exposed on accident to an end-user
+    throw new PDOException($e->getMessage(), (int)$e->getCode());
 }
 

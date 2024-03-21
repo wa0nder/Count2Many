@@ -73,7 +73,7 @@ export function getCountersList(owner, numToFetch){
 
         dispatch( fetchCountersList() );
 
-        return fetch(`http://sidewalks.com/play-app/realDB.php?owner=${owner}&count=${numToFetch}`)
+        return fetch(`http://www.myreactlearn.com/realDB.php?owner=${owner}&count=${numToFetch}`)
 
         .then( response => response.json() )
 
@@ -99,7 +99,7 @@ function updateCountersList(owner, id, actionType){
                 break;
         }
         
-        return fetch("http://sidewalks.com/play-app/realDB.php", {
+        return fetch("http://www.myreactlearn.com/realDB.php", {
             method: 'POST', 
             mode: 'cors',
             headers: { 'Content-Type': 'application/json' },
@@ -118,7 +118,7 @@ function saveCounters(list, actionType){
 
         dispatch( saveCountersListStart() );
 
-        fetch("http://sidewalks.com/play-app/realDB.php", {
+        fetch("http://www.myreactlearn.com/realDB.php", {
             method: 'POST', 
             mode: 'cors',
             headers: { 'Content-Type': 'application/json' },

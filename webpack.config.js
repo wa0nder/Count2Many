@@ -7,7 +7,8 @@ module.exports = {
   output: {
     filename: 'output.js',
     path: path.resolve(__dirname, 'dist'),
-    publicPath: '/dist/'
+    publicPath: '/dist/',
+    sourceMapFilename: "output.js.map"  
   },
   watch:true,
   optimization: {
