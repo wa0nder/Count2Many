@@ -77,7 +77,7 @@ function OwnerInput({ updateOwner }){
     return (
 
         <form>
-            <label htmlFor="name">Your Name: </label>
+            <label htmlFor="name">Enter your name: </label>
             <input type="text" id="name" name="name" value={owner} onChange={handleInput}/>
             <button className="counterBtn" type="button" onClick={submitInput}>{"\u2713"}</button>
             { validName ? 
