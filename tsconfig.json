@@ -1,0 +1,18 @@
+{
+    "compilerOptions": {
+        "strict": true,
+        "module": "nodenext",
+        "removeComments": false,
+        "preserveConstEnums": true,
+        "sourceMap": true,
+        "jsx": "preserve",
+        // Ensure that .d.ts files are created by tsc, but not .js files
+        "declaration": true,
+        "emitDeclarationOnly": true,
+        //
+        "isolatedModules": true,
+        "esModuleInterop": true
+    },
+    "include": ["src/**/*"],
+    "exclude": ["**/*.spec.ts"]
+}

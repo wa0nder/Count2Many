@@ -1,5 +1,4 @@
 const path = require('path');
-const webpack = require('webpack');
 
 module.exports = {
   entry: './dist/App.js',
@@ -10,7 +9,6 @@ module.exports = {
     publicPath: '/dist/',
     sourceMapFilename: "output.js.map"  
   },
-  watch:true,
   optimization: {
      minimize: false
   }
