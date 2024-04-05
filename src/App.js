@@ -9,7 +9,7 @@ import HighScores from "./HighScores.js";
 import PageHolder from "./PageHolder.js";
 import CounterPage from "./CounterPage.js";
 import CounterList from "./CounterList.js";
-import { store } from "./store.js";
+import { store } from "./reduxStore.js";
 import OwnerInput from "./OwnerInput.js";
 
 function App({ store }){

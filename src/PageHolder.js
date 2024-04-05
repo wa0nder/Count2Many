@@ -2,7 +2,7 @@ import React from "react";
 
 function PageHolder(){
     return (
-        <h1> Welcome to Timer Supremacy! </h1>
+        <h1> Welcome to Counter Supremacy! </h1>
     )
 }
 

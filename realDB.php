@@ -153,6 +153,14 @@ function deleteFromDB($conn, $owner, $id){
     }
 }
 
+function getHighScores($conn){
+    $stmt = $conn->prepare("SELECT * FROM HighScores");
+    $stmt->execute();
+    $array = $stmt->fetchAll();
+
+    return $array;
+}
+
 if( $_SERVER["REQUEST_METHOD"] == "GET" ){
 
     $out;
@@ -168,12 +176,16 @@ if( $_SERVER["REQUEST_METHOD"] == "GET" ){
         $out = $get["body"];
 
     }
-    else if( isset($_GET["checkValid"]) ){
+    else if( isset($_GET["checkOwner"]) ){
 
-        $exists = userInDB( $conn, $_GET["owner"] );
+        $exists = userInDB( $conn, $_GET["checkOwner"] );
 
         $status = $exists ? ERROR : OK;
         $out = $exists ? "Username already taken" : "Username is available";
+    }
+    else if( isset($_GET["highscores"]) ){
+        $out = getHighScores($conn);
+        $status = OK;
     }
     else{
 

@@ -46,6 +46,16 @@ try{
         )";
     
     $conn->exec($sql);
+
+    $sql = "CREATE TABLE IF NOT EXISTS HighScores (
+        username VARCHAR(30),
+        id VARCHAR(10) NOT NULL PRIMARY KEY,
+        val int NOT NULL,
+        state VARCHAR(10),
+        reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        )";
+    
+    $conn->exec($sql);
 }
 catch(PDOException $e) {
     //re-throw error so that stack trace begins after credentials line so credentials

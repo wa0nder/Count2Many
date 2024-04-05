@@ -4,6 +4,8 @@
   "description": "",
   "main": "App.js",
   "dependencies": {
+    "@types/react": "^18.2.74",
+    "@types/react-dom": "^18.2.24",
     "nanoid": "^3.1.16",
     "react": "^17.0.0",
     "react-dom": "^17.0.0",
@@ -30,7 +32,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "npm run babel-build && webpack",
-    "babel-build": "babel src/ --out-dir dist --extensions '.ts,.tsx'",
+    "babel-build": "babel src/ --out-dir dist --extensions '.js,.ts,.tsx'",
     "babel-watch": "npm run babel-build -- --watch",
     "webpack-watch": "webpack --watch",
     "ts-watch": "tsc --watch",

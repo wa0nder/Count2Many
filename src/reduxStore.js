@@ -1,16 +1,17 @@
-import { createStore, applyMiddleware } from "redux";
+import { createStore, combineReducers, applyMiddleware } from "redux";
 import thunkMiddleware from "redux-thunk";
 //import { counterReducer, counterInitialState } from "./Counter.js";
 import { counterListReducer, counterListInitialState } from "./CounterList.js";
+import { updateScoresReducer } from "./HighScores.js";
 
 const storeInitialState = {
-    //counter: counterInitialState,
+    scores: {},
     counterList: counterListInitialState
 };
 
 function allReducers(state=storeInitialState, action){
     return {
-        //counter: counterReducer(state.counter, action),
+        scores: updateScoresReducer(state.scores, action),
         counterList: counterListReducer(state.counterList, action)
     }
 }

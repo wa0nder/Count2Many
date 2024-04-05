@@ -9,9 +9,9 @@
         // Ensure that .d.ts files are created by tsc, but not .js files
         "declaration": true,
         "emitDeclarationOnly": true,
-        //
         "isolatedModules": true,
-        "esModuleInterop": true
+        "esModuleInterop": true,
+        "noUncheckedIndexedAccess": true
     },
     "include": ["src/**/*"],
     "exclude": ["**/*.spec.ts"]
